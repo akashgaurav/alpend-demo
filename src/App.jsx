@@ -1149,21 +1149,18 @@ function MarketsScreen({ partyId, balance, onLogout }) {
             <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(hasPositions ? fmtUSD(netWorth) : '—')}</p>
           </div>
 
-          {/* Supply / Borrow — grouped card */}
+          {/* Supplied */}
           <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0 }}>
-            <div style={{ display: 'flex', background: '#071a1a', border: '1px solid #112828', borderRadius: 10, overflow: 'hidden' }}>
-              <div style={{ padding: '9px 16px' }}>
-                <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>Supplied</p>
-                <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalSuppliedUSD))}</p>
-                <p style={{ fontSize: 8, color: netAPY !== null ? '#14b8a6aa' : '#2a5050', marginTop: 3 }}>{netAPY !== null ? `${fmtPct(netAPY)} APY` : '—'}</p>
-              </div>
-              <div style={{ width: 1, background: '#112828', flexShrink: 0 }} />
-              <div style={{ padding: '9px 16px' }}>
-                <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>Borrowed</p>
-                <p style={{ fontSize: 14, fontWeight: 700, color: totalBorrowedUSD > 0 ? '#f59e0b' : '#3a6060', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalBorrowedUSD))}</p>
-                <p style={{ fontSize: 8, color: totalBorrowedUSD > 0 ? '#f59e0baa' : '#2a5050', marginTop: 3 }}>{totalBorrowedUSD > 0 ? 'Outstanding' : '—'}</p>
-              </div>
-            </div>
+            <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Supplied</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalSuppliedUSD))}</p>
+            <p style={{ fontSize: 8, color: netAPY !== null ? '#14b8a6aa' : '#2a5050', marginTop: 3 }}>{netAPY !== null ? `${fmtPct(netAPY)} APY` : '—'}</p>
+          </div>
+
+          {/* Borrowed */}
+          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0 }}>
+            <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Borrowed</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: totalBorrowedUSD > 0 ? '#f59e0b' : '#3a6060', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalBorrowedUSD))}</p>
+            <p style={{ fontSize: 8, color: totalBorrowedUSD > 0 ? '#f59e0baa' : '#2a5050', marginTop: 3 }}>{totalBorrowedUSD > 0 ? 'Outstanding' : '—'}</p>
           </div>
 
           {/* Health factor */}
@@ -1180,12 +1177,12 @@ function MarketsScreen({ partyId, balance, onLogout }) {
               )}
             </div>
             {healthFactor !== null && (
-              <div style={{ position: 'relative', width: 110 }}>
-                <div style={{ height: 3, background: '#0a1e1e', borderRadius: 2 }}>
-                  <div style={{ height: '100%', borderRadius: 2, background: `linear-gradient(90deg, ${hfColor}70, ${hfColor})`, boxShadow: `0 0 5px ${hfColor}55`, transition: 'width 0.5s', width: `${Math.min(Math.max((healthFactor - 0.5) / 2.0, 0), 1) * 100}%` }} />
+              <div style={{ position: 'relative', width: 120 }}>
+                <div style={{ height: 5, background: '#0a1e1e', borderRadius: 3 }}>
+                  <div style={{ height: '100%', borderRadius: 3, background: `linear-gradient(90deg, ${hfColor}70, ${hfColor})`, boxShadow: `0 0 6px ${hfColor}55`, transition: 'width 0.5s', width: `${Math.min(Math.log1p(healthFactor) / Math.log1p(75), 1) * 100}%` }} />
                 </div>
-                {/* Liquidation marker at 25% = HF 1.0 */}
-                <div style={{ position: 'absolute', top: -2, bottom: -2, left: '25%', width: 1, background: '#ef444455' }} />
+                {/* Liquidation marker at log-scale position of HF 1.0 ≈ 16% */}
+                <div style={{ position: 'absolute', top: -2, bottom: -2, left: `${Math.log1p(1) / Math.log1p(75) * 100}%`, width: 1, background: '#ef444455' }} />
               </div>
             )}
           </div>
@@ -1274,13 +1271,13 @@ function MarketsScreen({ partyId, balance, onLogout }) {
             </div>
             {/* Column headers */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 0.8fr 88px', padding: '8px 20px', gap: 8 }}>
-              {['Asset', 'Wallet', 'APY', 'Utilization', ''].map((h, i) => (
+              {['Asset', 'Wallet', 'APY', 'Liquidity', ''].map((h, i) => (
                 <span key={i} style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</span>
               ))}
             </div>
             {MARKET_ASSETS.map(asset => {
-              const util = asset.totalBorrowed / asset.totalSupplied
-              const uColor = util > 0.8 ? '#ef4444' : util > 0.6 ? '#f59e0b' : '#14b8a6'
+              const avail = asset.totalSupplied - asset.totalBorrowed
+              const util  = asset.totalBorrowed / asset.totalSupplied
               const wb = walletBal(asset)
               const hasSupply = !!positions.supplied[asset.id]
               return (
@@ -1301,7 +1298,10 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                     <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
                   </div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.supplyApy)}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, fontFamily: 'JetBrains Mono', color: uColor, background: uColor+'18', border: `1px solid ${uColor}35`, borderRadius: 6, padding: '3px 8px', display: 'inline-block' }}>{Math.round(util*100)}%</span>
+                  <div>
+                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtUSD(avail * asset.price)}</p>
+                    <p style={{ fontSize: 9, color: '#5a8888', marginTop: 2 }}>{Math.round(util*100)}% utilized</p>
+                  </div>
                   <button onClick={() => openModal('supply', asset)}
                     style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: hasSupply ? '#14b8a618' : '#14b8a622', border: '1px solid #14b8a640', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                     onMouseEnter={e => { e.currentTarget.style.background='#14b8a630'; e.currentTarget.style.borderColor='#14b8a660' }}
@@ -1493,7 +1493,7 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                   // HF < 1.0 = liquidation zone, HF ≥ 2.0 = safe zone
                   const hfToBarPct = (hf) => hf === null
                     ? 1                                              // no borrows = full safe bar
-                    : Math.min(Math.max((hf - 0.5) / 2.0, 0), 1)   // 0.5→0%, 1.0→25%, 2.0→75%, 2.5→100%
+                    : Math.min(Math.log1p(hf) / Math.log1p(75), 1) // log scale: HF 1→16%, 2→22%, 10→57%, 71→99%
                   const displayHF   = parseFloat(modalAmount) > 0 ? previewHF : healthFactor
                   const displayColor = displayHF === null ? '#14b8a6' : displayHF >= 2 ? '#14b8a6' : displayHF >= 1.2 ? '#f59e0b' : '#ef4444'
                   const displayLabel = displayHF === null ? 'Safe' : displayHF >= 2 ? 'Safe' : displayHF >= 1.2 ? 'Monitor' : 'At Risk'
@@ -1504,34 +1504,34 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                   const beforePct   = hfToBarPct(beforeHF)
                   const showBefore  = parseFloat(modalAmount) > 0 && beforeHF !== displayHF
                   return (
-                    <div style={{ background: '#071818', border: `1px solid ${displayColor}28`, borderRadius: 10, padding: '12px 14px', marginBottom: 18 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                        <span style={{ fontSize: 10, color: '#5a8888' }}>Health Factor</span>
+                    <div style={{ background: '#071818', border: `1px solid ${displayColor}28`, borderRadius: 10, padding: '14px 16px', marginBottom: 18 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <span style={{ fontSize: 10, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Health Factor</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                           {showBefore && (
-                            <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono', color: beforeColor, opacity: 0.45 }}>
+                            <span style={{ fontSize: 12, fontFamily: 'JetBrains Mono', color: beforeColor, opacity: 0.45 }}>
                               {beforeHF === null ? '∞' : beforeHF.toFixed(2)}
                             </span>
                           )}
                           {showBefore && <span style={{ fontSize: 9, color: '#3a5a5a' }}>→</span>}
-                          <span style={{ fontSize: 15, fontWeight: 700, fontFamily: 'JetBrains Mono', color: displayColor }}>
+                          <span style={{ fontSize: 17, fontWeight: 700, fontFamily: 'JetBrains Mono', color: displayColor }}>
                             {displayHF === null ? '∞' : displayHF.toFixed(2)}
                           </span>
-                          <span style={{ fontSize: 9, fontWeight: 600, color: displayColor, background: displayColor+'18', border: `1px solid ${displayColor}35`, borderRadius: 5, padding: '2px 6px' }}>{displayLabel}</span>
+                          <span style={{ fontSize: 9, fontWeight: 600, color: displayColor, background: displayColor+'18', border: `1px solid ${displayColor}35`, borderRadius: 5, padding: '2px 7px' }}>{displayLabel}</span>
                         </div>
                       </div>
                       {/* Bar track */}
-                      <div style={{ position: 'relative', height: 5, background: '#0a1e1e', borderRadius: 3 }}>
+                      <div style={{ position: 'relative', height: 7, background: '#0a1e1e', borderRadius: 4 }}>
                         {/* Ghost "before" bar */}
                         {showBefore && (
-                          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 3, width: `${beforePct*100}%`, background: beforeColor+'30', transition: 'width 0.4s' }} />
+                          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 4, width: `${beforePct*100}%`, background: beforeColor+'30', transition: 'width 0.4s' }} />
                         )}
                         {/* Current bar */}
-                        <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 3, width: `${barPct*100}%`, background: `linear-gradient(90deg, ${displayColor}70, ${displayColor})`, boxShadow: `0 0 7px ${displayColor}55`, transition: 'width 0.4s, background 0.4s' }} />
-                        {/* Liquidation marker at 25% (= HF 1.0) */}
-                        <div style={{ position: 'absolute', top: -2, bottom: -2, left: '25%', width: 1, background: '#ef444460' }} />
+                        <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 4, width: `${barPct*100}%`, background: `linear-gradient(90deg, ${displayColor}70, ${displayColor})`, boxShadow: `0 0 8px ${displayColor}55`, transition: 'width 0.4s, background 0.4s' }} />
+                        {/* Liquidation marker at log-scale position of HF 1.0 ≈ 16% */}
+                        <div style={{ position: 'absolute', top: -3, bottom: -3, left: `${Math.log1p(1) / Math.log1p(75) * 100}%`, width: 1.5, background: '#ef444460' }} />
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7 }}>
                         <span style={{ fontSize: 8, color: '#ef444470' }}>← Liquidation at 1.0</span>
                         <span style={{ fontSize: 8, color: '#14b8a650' }}>Safe ≥ 2.0 →</span>
                       </div>
