@@ -1321,8 +1321,8 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
               <span style={{ fontSize: 9, color: '#4a7878' }}>{fmtUSD(totalTVL)} total supplied</span>
             </div>
             {/* Column headers */}
-            <div style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1fr 0.8fr 1.1fr 0.6fr 88px' : '2fr 0.8fr 1.1fr 0.6fr 88px', padding: '8px 20px', gap: 8 }}>
-              {(connected ? ['Asset', 'Wallet', 'APY', 'Market Size', 'Max LTV', ''] : ['Asset', 'APY', 'Market Size', 'Max LTV', '']).map((h, i) => (
+            <div style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1.2fr 0.7fr 0.7fr 1fr 88px' : '2fr 1.2fr 0.7fr 0.7fr 88px', padding: '8px 20px', gap: 16 }}>
+              {(connected ? ['Asset', 'Market Size', 'APY', 'Max LTV', 'Wallet', ''] : ['Asset', 'Market Size', 'APY', 'Max LTV', '']).map((h, i) => (
                 <span key={i} style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</span>
               ))}
             </div>
@@ -1332,7 +1332,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
               const wb = walletBal(asset)
               const hasSupply = !!positions.supplied[asset.id]
               return (
-                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1fr 0.8fr 1.1fr 0.6fr 88px' : '2fr 0.8fr 1.1fr 0.6fr 88px', padding: '13px 20px', gap: 8, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}
+                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1.2fr 0.7fr 0.7fr 1fr 88px' : '2fr 1.2fr 0.7fr 0.7fr 88px', padding: '13px 20px', gap: 16, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.background='#0d262600'}
                   onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
@@ -1344,16 +1344,16 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                       <p style={{ fontSize: 9, color: '#5a8888' }}>{asset.name}</p>
                     </div>
                   </div>
-                  {connected && <div>
-                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{mask(fmtToken(wb, 2))}</p>
-                    <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
-                  </div>}
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.supplyApy)}</span>
                   <div>
                     <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtUSD(asset.totalSupplied * asset.price)}</p>
                     <p style={{ fontSize: 9, color: '#5a8888', marginTop: 2 }}>{Math.round(util*100)}% utilized</p>
                   </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.supplyApy)}</span>
                   <span style={{ fontSize: 12, color: '#6aabab', fontFamily: 'JetBrains Mono' }}>{asset.ltv}%</span>
+                  {connected && <div>
+                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{mask(fmtToken(wb, 2))}</p>
+                    <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
+                  </div>}
                   <button onClick={() => connected ? openModal('supply', asset) : onConnect?.()}
                     style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: connected && hasSupply ? '#14b8a618' : '#14b8a622', border: '1px solid #14b8a640', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                     onMouseEnter={e => { e.currentTarget.style.background='#14b8a630'; e.currentTarget.style.borderColor='#14b8a660' }}
@@ -1419,7 +1419,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
               <span style={{ fontSize: 10, fontWeight: 700, color: '#4a8080', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Assets to Borrow</span>
               <span style={{ fontSize: 9, color: '#4a7878' }}>{fmtUSD(totalBorrowedProtocol)} outstanding</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: connected ? '1.8fr 1fr 1fr 0.8fr 88px' : '1.8fr 1fr 1fr 88px', padding: '8px 20px', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1.1fr 0.8fr 1fr 88px' : '2fr 1.1fr 0.8fr 88px', padding: '8px 20px', gap: 16 }}>
               {(connected ? ['Asset', 'Available', 'Rate', 'Your Limit', ''] : ['Asset', 'Available', 'Rate', '']).map((h, i) => (
                 <span key={i} style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</span>
               ))}
@@ -1435,7 +1435,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
               const yourLimitTokens = yourLimitUSD / asset.price
               const hasBorrow = !!positions.borrowed[asset.id]
               return (
-                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: connected ? '1.8fr 1fr 1fr 0.8fr 88px' : '1.8fr 1fr 1fr 88px', padding: '13px 20px', gap: 8, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}>
+                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1.1fr 0.8fr 1fr 88px' : '2fr 1.1fr 0.8fr 88px', padding: '13px 20px', gap: 16, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 9, background: asset.color+'18', border: `1px solid ${asset.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
                       <img src={asset.icon} alt={asset.symbol} style={{ width: 20, height: 20, objectFit: 'contain' }} />
