@@ -57,8 +57,10 @@ body::before {
 
 .dot-bg-subtle {
   background-color: #071e1e;
-  background-image: radial-gradient(circle, #0e2626 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, #0d2e2e 0%, transparent 70%),
+    radial-gradient(circle, #122e2e 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px;
 }
 
 /* Hero CTA — circular fill sweep */

@@ -194,7 +194,7 @@ function truncatePartyId(id) {
 // SHARED: Header
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Header({ partyId, onLogout }) {
+function Header({ partyId, onLogout, onConnect }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -213,7 +213,7 @@ function Header({ partyId, onLogout }) {
       <a href="https://alpend.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center' }}>
         <AlpendLogo className="h-[22px] w-auto" />
       </a>
-      {partyId && (
+      {partyId ? (
         <div className="flex items-center gap-3">
           {/* Party ID — click to copy */}
           <div
@@ -233,7 +233,6 @@ function Header({ partyId, onLogout }) {
               {copied ? 'Copied!' : truncatePartyId(partyId)}
             </span>
           </div>
-          {/* Logout */}
           {onLogout && (
             <button
               onClick={onLogout}
@@ -246,7 +245,17 @@ function Header({ partyId, onLogout }) {
             </button>
           )}
         </div>
-      )}
+      ) : onConnect ? (
+        <button
+          onClick={onConnect}
+          className="text-xs px-4 py-2 rounded-lg transition-all duration-150 font-semibold"
+          style={{ color: '#071e1e', background: '#14b8a6', border: 'none', letterSpacing: '0.02em' }}
+          onMouseEnter={e => e.currentTarget.style.background = '#0d9488'}
+          onMouseLeave={e => e.currentTarget.style.background = '#14b8a6'}
+        >
+          Connect Wallet
+        </button>
+      ) : null}
     </header>
   )
 }
@@ -919,9 +928,9 @@ function SubmittedScreen({ email, partyId, onLogout, onEnterMarkets }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MARKET_ASSETS = [
-  { id: 'cbtc',  name: 'CBTC',        symbol: 'CBTC',  icon: '/bitcoin-logo.svg', color: '#f7931a', supplyApy: 1.24, borrowRate: 3.82, price: 95420,  ltv: 70, totalSupplied: 145.8,   totalBorrowed: 99.1,    walletKey: 'cbtc'  },
-  { id: 'usdcx', name: 'USDCx',       symbol: 'USDCx', icon: '/usdc.svg',         color: '#2775ca', supplyApy: 4.85, borrowRate: 6.20, price: 1.00,   ltv: 80, totalSupplied: 8500000, totalBorrowed: 6120000, walletKey: 'usdcx' },
-  { id: 'cc',    name: 'Canton Coin', symbol: 'CC',    icon: '/cccoin.svg',       color: '#14b8a6', supplyApy: 2.10, borrowRate: 5.50, price: 0.85,   ltv: 60, totalSupplied: 1200000, totalBorrowed: 660000,  walletKey: 'cc'    },
+  { id: 'cbtc',  name: 'BitSafe BTC',       symbol: 'CBTC',  icon: '/cbtc.webp', color: '#f7931a', supplyApy: 1.24, borrowRate: 3.82, price: 95420,  ltv: 70, totalSupplied: 145.8,   totalBorrowed: 99.1,    walletKey: 'cbtc'  },
+  { id: 'usdcx', name: 'Circle Stablecoin', symbol: 'USDCx', icon: '/usdc.svg',         color: '#2775ca', supplyApy: 4.85, borrowRate: 6.20, price: 1.00,   ltv: 80, totalSupplied: 8500000, totalBorrowed: 6120000, walletKey: 'usdcx' },
+  { id: 'cc',    name: 'Canton Coin',       symbol: 'CC',    icon: '/cccoin.svg',       color: '#14b8a6', supplyApy: 2.10, borrowRate: 5.50, price: 0.85,   ltv: 60, totalSupplied: 1200000, totalBorrowed: 660000,  walletKey: 'cc'    },
 ]
 
 function fmtUSD(n) {
@@ -1058,7 +1067,7 @@ function DonutRing({ pct, color, size = 36, stroke = 3 }) {
   )
 }
 
-function MarketsScreen({ partyId, balance, onLogout }) {
+function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect }) {
   const [modal, setModal]           = useState(null)
   const [modalStep, setModalStep]   = useState(1)
   const [modalAmount, setModalAmount] = useState('')
@@ -1137,12 +1146,13 @@ function MarketsScreen({ partyId, balance, onLogout }) {
 
   return (
     <div className="dot-bg-subtle" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header partyId={partyId} onLogout={onLogout} />
+      <Header partyId={connected ? partyId : null} onLogout={connected ? onLogout : null} onConnect={!connected ? onConnect : null} />
 
       {/* ── Portfolio stats bar ──────────────────────────────────────────── */}
       <div style={{ marginTop: 56, borderBottom: '1px solid #0d2424', background: 'linear-gradient(90deg, #071a1a, #081e1e)', position: 'sticky', top: 56, zIndex: 10 }}>
         <div className="px-4 sm:px-8 md:px-14" style={{ display: 'flex', alignItems: 'stretch' }}>
 
+          {connected ? (<>
           {/* Net worth */}
           <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
             <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Net Worth</p>
@@ -1186,20 +1196,39 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                 <div style={{ height: 5, background: '#0a1e1e', borderRadius: 3 }}>
                   <div style={{ height: '100%', borderRadius: 3, background: `linear-gradient(90deg, ${hfColor}70, ${hfColor})`, boxShadow: `0 0 6px ${hfColor}55`, transition: 'width 0.5s', width: `${Math.min(Math.log1p(healthFactor) / Math.log1p(75), 1) * 100}%` }} />
                 </div>
-                {/* Liquidation marker at log-scale position of HF 1.0 ≈ 16% */}
                 <div style={{ position: 'absolute', top: -2, bottom: -2, left: `${Math.log1p(1) / Math.log1p(75) * 100}%`, width: 1, background: '#ef444455' }} />
               </div>
             )}
           </div></div>
-
-          {/* Protocol TVL */}
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center', borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 'auto', flexShrink: 0 }}>
+          </>) : (<>
+          {/* Public: protocol-level stats */}
+          <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
+            <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Total Market Size</p>
+            <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
+            <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{MARKET_ASSETS.length} assets</p>
+          </div>
+          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ padding: '18px 0' }}>
-              <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Protocol TVL</p>
-              <p style={{ fontSize: 14, fontWeight: 600, color: '#8ecece', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
-              <p style={{ fontSize: 9, color: '#4a7878', marginTop: 3 }}>Canton · T+0</p>
+              <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Total Borrowed</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalBorrowedProtocol)}</p>
+              <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{Math.round(totalBorrowedProtocol / totalTVL * 100)}% of pool</p>
             </div>
           </div>
+          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            <div style={{ padding: '18px 0' }}>
+              <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Best Supply APY</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtPct(Math.max(...MARKET_ASSETS.map(a => a.supplyApy)))}</p>
+              <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{MARKET_ASSETS.sort((a,b) => b.supplyApy - a.supplyApy)[0].symbol}</p>
+            </div>
+          </div>
+          </>)}
+
+          {/* Protocol TVL */}
+          <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
+            <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Protocol TVL</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#8ecece', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
+          </div>
+          <div style={{ flex: 1 }} />
 
           {/* Right: privacy + mask */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 0 0 24px', flexShrink: 0 }}>
@@ -1218,13 +1247,30 @@ function MarketsScreen({ partyId, balance, onLogout }) {
       </div>
 
       {/* ── Aave-style two-column layout ────────────────────────────────── */}
+      {/* Trust section */}
+      <div className="px-4 sm:px-8 md:px-14" style={{ borderBottom: '1px solid #0a2020', display: 'flex' }}>
+        {[
+          { label: 'Powered by',    name: 'Canton Network',  sub: 'L1 Privacy Blockchain',    icon: '/canton-icon.svg',    iconStyle: { height: 16, opacity: 0.9 } },
+          { label: 'Settlement via', name: 'Chainlink Oracle', sub: 'Tamper-proof price feeds', icon: '/chainlink-logo.svg', iconStyle: { height: 16, opacity: 0.85 } },
+        ].map((item, i) => (
+          <div key={i} style={{ padding: '18px 28px 18px 0', marginRight: 28, borderRight: i < 1 ? '1px solid #0a2020' : 'none', paddingRight: 28 }}>
+            <p style={{ fontSize: 8, color: '#3a6060', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6, fontFamily: 'JetBrains Mono' }}>{item.label}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <img src={item.icon} alt={item.name} style={item.iconStyle} />
+              <p style={{ fontSize: 15, fontWeight: 600, color: '#c8e8e8', letterSpacing: '-0.01em' }}>{item.name}</p>
+            </div>
+            <p style={{ fontSize: 10, color: '#4a7878', fontFamily: 'JetBrains Mono' }}>{item.sub}</p>
+          </div>
+        ))}
+      </div>
+
       <main className="px-4 sm:px-8 md:px-14 pt-6 pb-8" style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
 
         {/* ════ SUPPLY COLUMN ════ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Your Supplies */}
-          {totalSuppliedUSD > 0 && (
+          {connected && totalSuppliedUSD > 0 && (
             <div style={card()} className="fade-up">
               <div style={{ padding: '12px 20px', borderBottom: '1px solid #0d2424', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -1275,8 +1321,8 @@ function MarketsScreen({ partyId, balance, onLogout }) {
               <span style={{ fontSize: 9, color: '#4a7878' }}>{fmtUSD(totalTVL)} total supplied</span>
             </div>
             {/* Column headers */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 0.8fr 1.1fr 0.6fr 88px', padding: '8px 20px', gap: 8 }}>
-              {['Asset', 'Wallet', 'APY', 'Market Size', 'Max LTV', ''].map((h, i) => (
+            <div style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1fr 0.8fr 1.1fr 0.6fr 88px' : '2fr 0.8fr 1.1fr 0.6fr 88px', padding: '8px 20px', gap: 8 }}>
+              {(connected ? ['Asset', 'Wallet', 'APY', 'Market Size', 'Max LTV', ''] : ['Asset', 'APY', 'Market Size', 'Max LTV', '']).map((h, i) => (
                 <span key={i} style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</span>
               ))}
             </div>
@@ -1286,7 +1332,7 @@ function MarketsScreen({ partyId, balance, onLogout }) {
               const wb = walletBal(asset)
               const hasSupply = !!positions.supplied[asset.id]
               return (
-                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 0.8fr 1.1fr 0.6fr 88px', padding: '13px 20px', gap: 8, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}
+                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: connected ? '2fr 1fr 0.8fr 1.1fr 0.6fr 88px' : '2fr 0.8fr 1.1fr 0.6fr 88px', padding: '13px 20px', gap: 8, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.background='#0d262600'}
                   onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
@@ -1298,20 +1344,21 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                       <p style={{ fontSize: 9, color: '#5a8888' }}>{asset.name}</p>
                     </div>
                   </div>
-                  <div>
+                  {connected && <div>
                     <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{mask(fmtToken(wb, 2))}</p>
                     <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
-                  </div>
+                  </div>}
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.supplyApy)}</span>
                   <div>
                     <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtUSD(asset.totalSupplied * asset.price)}</p>
+                    <p style={{ fontSize: 9, color: '#5a8888', marginTop: 2 }}>{Math.round(util*100)}% utilized</p>
                   </div>
                   <span style={{ fontSize: 12, color: '#6aabab', fontFamily: 'JetBrains Mono' }}>{asset.ltv}%</span>
-                  <button onClick={() => openModal('supply', asset)}
-                    style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: hasSupply ? '#14b8a618' : '#14b8a622', border: '1px solid #14b8a640', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                  <button onClick={() => connected ? openModal('supply', asset) : onConnect?.()}
+                    style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: connected && hasSupply ? '#14b8a618' : '#14b8a622', border: '1px solid #14b8a640', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                     onMouseEnter={e => { e.currentTarget.style.background='#14b8a630'; e.currentTarget.style.borderColor='#14b8a660' }}
-                    onMouseLeave={e => { e.currentTarget.style.background= hasSupply ? '#14b8a618' : '#14b8a622'; e.currentTarget.style.borderColor='#14b8a640' }}>
-                    {hasSupply ? '+ Supply' : 'Supply'}
+                    onMouseLeave={e => { e.currentTarget.style.background= connected && hasSupply ? '#14b8a618' : '#14b8a622'; e.currentTarget.style.borderColor='#14b8a640' }}>
+                    {connected ? (hasSupply ? '+ Supply' : 'Supply') : 'Connect'}
                   </button>
                 </div>
               )
@@ -1323,7 +1370,7 @@ function MarketsScreen({ partyId, balance, onLogout }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Your Borrows */}
-          {totalBorrowedUSD > 0 && (
+          {connected && totalBorrowedUSD > 0 && (
             <div style={card()} className="fade-up">
               <div style={{ padding: '12px 20px', borderBottom: '1px solid #0d2424', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -1372,8 +1419,8 @@ function MarketsScreen({ partyId, balance, onLogout }) {
               <span style={{ fontSize: 10, fontWeight: 700, color: '#4a8080', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Assets to Borrow</span>
               <span style={{ fontSize: 9, color: '#4a7878' }}>{fmtUSD(totalBorrowedProtocol)} outstanding</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 0.8fr 88px', padding: '8px 20px', gap: 8 }}>
-              {['Asset', 'Available', 'Rate', 'Your Limit', ''].map((h, i) => (
+            <div style={{ display: 'grid', gridTemplateColumns: connected ? '1.8fr 1fr 1fr 0.8fr 88px' : '1.8fr 1fr 1fr 88px', padding: '8px 20px', gap: 8 }}>
+              {(connected ? ['Asset', 'Available', 'Rate', 'Your Limit', ''] : ['Asset', 'Available', 'Rate', '']).map((h, i) => (
                 <span key={i} style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</span>
               ))}
             </div>
@@ -1388,7 +1435,7 @@ function MarketsScreen({ partyId, balance, onLogout }) {
               const yourLimitTokens = yourLimitUSD / asset.price
               const hasBorrow = !!positions.borrowed[asset.id]
               return (
-                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 0.8fr 88px', padding: '13px 20px', gap: 8, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}>
+                <div key={asset.id} style={{ display: 'grid', gridTemplateColumns: connected ? '1.8fr 1fr 1fr 0.8fr 88px' : '1.8fr 1fr 1fr 88px', padding: '13px 20px', gap: 8, alignItems: 'center', borderTop: '1px solid #0a2020', transition: 'background 0.15s' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <div style={{ width: 32, height: 32, borderRadius: 9, background: asset.color+'18', border: `1px solid ${asset.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
                       <img src={asset.icon} alt={asset.symbol} style={{ width: 20, height: 20, objectFit: 'contain' }} />
@@ -1399,11 +1446,11 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                     </div>
                   </div>
                   <div>
-                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtUSD(avail * asset.price)}</p>
-                    <p style={{ fontSize: 9, color: '#5a8888', marginTop: 3 }}>{Math.round(util*100)}% utilized</p>
+                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtToken(avail, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
+                    <p style={{ fontSize: 9, color: '#5a8888', marginTop: 3 }}>{fmtUSD(avail * asset.price)}</p>
                   </div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.borrowRate)}</span>
-                  <div>
+                  {connected && <div>
                     {yourLimitUSD > 0
                       ? <>
                           <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtToken(yourLimitTokens, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
@@ -1411,12 +1458,12 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                         </>
                       : <p style={{ fontSize: 10, color: '#3a6060' }}>Supply first</p>
                     }
-                  </div>
-                  <button onClick={() => openModal('borrow', asset)}
-                    style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: hasBorrow ? '#f59e0b18' : '#f59e0b22', border: '1px solid #f59e0b40', color: '#f59e0b', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                  </div>}
+                  <button onClick={() => connected ? openModal('borrow', asset) : onConnect?.()}
+                    style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: connected && hasBorrow ? '#f59e0b18' : '#f59e0b22', border: '1px solid #f59e0b40', color: '#f59e0b', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                     onMouseEnter={e => { e.currentTarget.style.background='#f59e0b30'; e.currentTarget.style.borderColor='#f59e0b60' }}
-                    onMouseLeave={e => { e.currentTarget.style.background= hasBorrow ? '#f59e0b18' : '#f59e0b22'; e.currentTarget.style.borderColor='#f59e0b40' }}>
-                    {hasBorrow ? '+ Borrow' : 'Borrow'}
+                    onMouseLeave={e => { e.currentTarget.style.background= connected && hasBorrow ? '#f59e0b18' : '#f59e0b22'; e.currentTarget.style.borderColor='#f59e0b40' }}>
+                    {connected ? (hasBorrow ? '+ Borrow' : 'Borrow') : 'Connect'}
                   </button>
                 </div>
               )
@@ -1967,7 +2014,8 @@ function AppRoutes() {
           />
         } />
         <Route path="/submitted" element={<SubmittedScreen email={email} partyId={partyId} onLogout={handleLogout} onEnterMarkets={() => nav('/markets')} />} />
-        <Route path="/markets"   element={<MarketsScreen partyId={partyId} balance={balance} onLogout={handleLogout} />} />
+        <Route path="/markets"   element={<MarketsScreen partyId={partyId} balance={balance} onLogout={handleLogout} connected={true} />} />
+        <Route path="/app"       element={<MarketsScreen partyId={null} balance={null} onLogout={null} connected={false} onConnect={() => nav('/')} />} />
         <Route path="/terms"     element={<TermsScreen />} />
         <Route path="/privacy"   element={<PrivacyScreen />} />
       </Routes>
