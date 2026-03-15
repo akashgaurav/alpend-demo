@@ -1912,17 +1912,21 @@ function AppRoutes() {
   const nav = useNavigate()
   const location = useLocation()
 
-  const [partyId, setPartyId]       = useState('')
-  const [balance, setBalance]       = useState(null)
+  const DEMO_PARTY_ID = 'cac91f063bf74945c0aa9fc948cc14d4::12208cc6df7419a62dd1a4297567b56c7eeb259eca11416bb33189c649bd0f2990bc'
+  const DEMO_BALANCE  = { cbtc: '0.84', usdcx: '12400', cc: '5000' }
+  const [partyId, setPartyId]       = useState(() => localStorage.getItem('alpend_partyId') || DEMO_PARTY_ID)
+  const [balance, setBalance]       = useState(() => { try { const b = JSON.parse(localStorage.getItem('alpend_balance')); return b || DEMO_BALANCE } catch { return DEMO_BALANCE } })
   const [email, setEmail]           = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [steps, setSteps]           = useState({ email: false, twitter: false, telegram: false, partyId: false })
+  const [steps, setSteps]           = useState({ email: false, twitter: false, telegram: false, partyId: !!localStorage.getItem('alpend_partyId') })
 
   const handleJoin = () => {
     nav('/connect')
     setTimeout(() => {
-      setPartyId('cac91f063bf74945c0aa9fc948cc14d4::12208cc6df7419a62dd1a4297567b56c7eeb259eca11416bb33189c649bd0f2990bc')
-      setBalance({ cbtc: '0.84', usdcx: '12400', cc: '5000' })
+      setPartyId(DEMO_PARTY_ID)
+      setBalance(DEMO_BALANCE)
+      localStorage.setItem('alpend_partyId', DEMO_PARTY_ID)
+      localStorage.setItem('alpend_balance', JSON.stringify(DEMO_BALANCE))
       setSteps(s => ({ ...s, partyId: true }))
       nav('/whitelist')
     }, 2400)
@@ -1939,8 +1943,10 @@ function AppRoutes() {
   }
 
   const handleLogout = () => {
-    setPartyId(''); setEmail(''); setBalance(null)
+    setPartyId(DEMO_PARTY_ID); setEmail(''); setBalance(DEMO_BALANCE)
     setSteps({ email: false, twitter: false, telegram: false, partyId: false })
+    localStorage.removeItem('alpend_partyId')
+    localStorage.removeItem('alpend_balance')
     nav('/')
   }
 
