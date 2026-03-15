@@ -1678,8 +1678,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     onMouseLeave={e => { e.currentTarget.style.borderColor='#1e4040'; e.currentTarget.style.color='#4a7878' }}>← Back</button>
                   <button onClick={handleConfirm} style={{ flex: 1, padding: '13px', borderRadius: 12, fontSize: 13, fontWeight: 700, background: `linear-gradient(135deg, ${accent} 0%, ${isBorrowSide ? '#d97706' : '#0d9488'} 100%)`, border: 'none', color: '#071e1e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'opacity 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.opacity='0.88'} onMouseLeave={e => e.currentTarget.style.opacity='1'}>
-                    <IconShield size={13} color="#071e1e" />
-                    Confirm &amp; Shield
+                    {modal.type === 'supply' ? `Confirm Supply ${modal.asset.symbol}` : modal.type === 'borrow' ? `Confirm Borrow ${modal.asset.symbol}` : modal.type === 'repay' ? `Confirm Repay ${modal.asset.symbol}` : `Confirm Withdraw ${modal.asset.symbol}`}
                   </button>
                 </div>
               </div>
