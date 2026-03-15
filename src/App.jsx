@@ -919,7 +919,7 @@ function SubmittedScreen({ email, partyId, onLogout, onEnterMarkets }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MARKET_ASSETS = [
-  { id: 'cbtc',  name: 'cBTC',        symbol: 'cBTC',  icon: '/bitcoin-logo.svg', color: '#f7931a', supplyApy: 1.24, borrowRate: 3.82, price: 95420,  ltv: 70, totalSupplied: 145.8,   totalBorrowed: 99.1,    walletKey: 'cbtc'  },
+  { id: 'cbtc',  name: 'CBTC',        symbol: 'CBTC',  icon: '/bitcoin-logo.svg', color: '#f7931a', supplyApy: 1.24, borrowRate: 3.82, price: 95420,  ltv: 70, totalSupplied: 145.8,   totalBorrowed: 99.1,    walletKey: 'cbtc'  },
   { id: 'usdcx', name: 'USDCx',       symbol: 'USDCx', icon: '/usdc.svg',         color: '#2775ca', supplyApy: 4.85, borrowRate: 6.20, price: 1.00,   ltv: 80, totalSupplied: 8500000, totalBorrowed: 6120000, walletKey: 'usdcx' },
   { id: 'cc',    name: 'Canton Coin', symbol: 'CC',    icon: '/cccoin.svg',       color: '#14b8a6', supplyApy: 2.10, borrowRate: 5.50, price: 0.85,   ltv: 60, totalSupplied: 1200000, totalBorrowed: 660000,  walletKey: 'cc'    },
 ]
@@ -1081,7 +1081,7 @@ function MarketsScreen({ partyId, balance, onLogout }) {
         const a = MARKET_ASSETS.find(x => x.id === id)
         return s + (parseFloat(amt) || 0) * a.price * (a.ltv / 100) }, 0) / totalBorrowedUSD
     : null
-  const hfColor  = healthFactor === null ? '#4a7878' : healthFactor >= 2 ? '#14b8a6' : healthFactor >= 1.2 ? '#f59e0b' : '#ef4444'
+  const hfColor  = healthFactor === null ? '#14b8a6' : healthFactor >= 50 ? '#14b8a6' : healthFactor >= 10 ? '#34d399' : healthFactor >= 3 ? '#a3e635' : healthFactor >= 1 ? '#f59e0b' : '#ef4444'
   const totalTVL = MARKET_ASSETS.reduce((s, a) => s + a.totalSupplied * a.price, 0)
   const totalBorrowedProtocol = MARKET_ASSETS.reduce((s, a) => s + a.totalBorrowed * a.price, 0)
   const netAPY   = totalSuppliedUSD > 0
@@ -1144,27 +1144,32 @@ function MarketsScreen({ partyId, balance, onLogout }) {
         <div className="px-4 sm:px-8 md:px-14" style={{ display: 'flex', alignItems: 'stretch' }}>
 
           {/* Net worth */}
-          <div style={{ padding: '13px 24px 13px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
+          <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
             <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Net Worth</p>
             <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(hasPositions ? fmtUSD(netWorth) : '—')}</p>
           </div>
 
           {/* Supplied */}
-          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0 }}>
-            <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Supplied</p>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalSuppliedUSD))}</p>
-            <p style={{ fontSize: 8, color: netAPY !== null ? '#14b8a6aa' : '#2a5050', marginTop: 3 }}>{netAPY !== null ? `${fmtPct(netAPY)} APY` : '—'}</p>
+          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            <div style={{ padding: '18px 0' }}>
+              <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Supplied</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalSuppliedUSD))}</p>
+              <p style={{ fontSize: 8, color: netAPY !== null ? '#14b8a6aa' : '#2a5050', marginTop: 3 }}>{netAPY !== null ? `${fmtPct(netAPY)} APY` : '—'}</p>
+            </div>
           </div>
 
           {/* Borrowed */}
-          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0 }}>
-            <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Borrowed</p>
-            <p style={{ fontSize: 14, fontWeight: 700, color: totalBorrowedUSD > 0 ? '#f59e0b' : '#3a6060', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalBorrowedUSD))}</p>
-            <p style={{ fontSize: 8, color: totalBorrowedUSD > 0 ? '#f59e0baa' : '#2a5050', marginTop: 3 }}>{totalBorrowedUSD > 0 ? 'Outstanding' : '—'}</p>
+          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            <div style={{ padding: '18px 0' }}>
+              <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Borrowed</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: totalBorrowedUSD > 0 ? '#f59e0b' : '#3a6060', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalBorrowedUSD))}</p>
+              <p style={{ fontSize: 8, color: totalBorrowedUSD > 0 ? '#f59e0baa' : '#2a5050', marginTop: 3 }}>{totalBorrowedUSD > 0 ? 'Outstanding' : '—'}</p>
+            </div>
           </div>
 
           {/* Health factor */}
-          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0 }}>
+          <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{ padding: '18px 0' }}>
             <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Health Factor</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
               <p style={{ fontSize: 18, fontWeight: 700, color: hfColor, fontFamily: 'JetBrains Mono', lineHeight: 1 }}>
@@ -1185,11 +1190,11 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                 <div style={{ position: 'absolute', top: -2, bottom: -2, left: `${Math.log1p(1) / Math.log1p(75) * 100}%`, width: 1, background: '#ef444455' }} />
               </div>
             )}
-          </div>
+          </div></div>
 
           {/* Protocol TVL */}
           <div style={{ display: 'flex', gap: 20, alignItems: 'center', borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 'auto', flexShrink: 0 }}>
-            <div>
+            <div style={{ padding: '18px 0' }}>
               <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Protocol TVL</p>
               <p style={{ fontSize: 14, fontWeight: 600, color: '#8ecece', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
               <p style={{ fontSize: 9, color: '#4a7878', marginTop: 3 }}>Canton · T+0</p>
@@ -1476,16 +1481,23 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                 </div>
                 <p style={{ fontSize: 10, color: '#5a8888', fontFamily: 'JetBrains Mono', marginBottom: 12 }}>≈ {fmtUSD((parseFloat(modalAmount)||0) * modal.asset.price)}</p>
 
-                {/* Pct shortcuts */}
-                <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
-                  {[['25%',0.25],['50%',0.5],['75%',0.75],['Max',1]].map(([label, pct]) => (
-                    <button key={label} onClick={() => setModalAmount(String((getAvailable(modal.type, modal.asset)*pct).toFixed(6)))}
-                      style={{ flex: 1, padding: '6px 0', fontSize: 10, borderRadius: 8, background: '#0d2424', border: '1px solid #163838', color: '#4a7878', cursor: 'pointer', transition: 'all 0.12s', fontWeight: 500 }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor=accent+'50'; e.currentTarget.style.color=accent; e.currentTarget.style.background=accent+'08' }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor='#163838'; e.currentTarget.style.color='#4a7878'; e.currentTarget.style.background='#0d2424' }}
-                    >{label}</button>
-                  ))}
-                </div>
+                {/* Pct slider */}
+                {(() => {
+                  const avail = getAvailable(modal.type, modal.asset)
+                  const sliderPct = avail > 0 ? Math.round(Math.min((parseFloat(modalAmount)||0) / avail, 1) * 100) : 0
+                  return (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: 9, color: '#4a7878' }}>0%</span>
+                        <span style={{ fontSize: 9, fontWeight: 600, color: accent, fontFamily: 'JetBrains Mono' }}>{sliderPct}%</span>
+                        <span style={{ fontSize: 9, color: '#4a7878' }}>Max</span>
+                      </div>
+                      <input type="range" min="0" max="100" step="1" value={sliderPct}
+                        onChange={e => setModalAmount(String((avail * parseInt(e.target.value) / 100).toFixed(6)))}
+                        className="modal-slider" style={{ width: '100%' }} />
+                    </div>
+                  )
+                })()}
 
                 {/* HF preview */}
                 {(() => {
@@ -1495,12 +1507,12 @@ function MarketsScreen({ partyId, balance, onLogout }) {
                     ? 1                                              // no borrows = full safe bar
                     : Math.min(Math.log1p(hf) / Math.log1p(75), 1) // log scale: HF 1→16%, 2→22%, 10→57%, 71→99%
                   const displayHF   = parseFloat(modalAmount) > 0 ? previewHF : healthFactor
-                  const displayColor = displayHF === null ? '#14b8a6' : displayHF >= 2 ? '#14b8a6' : displayHF >= 1.2 ? '#f59e0b' : '#ef4444'
-                  const displayLabel = displayHF === null ? 'Safe' : displayHF >= 2 ? 'Safe' : displayHF >= 1.2 ? 'Monitor' : 'At Risk'
+                  const displayColor = displayHF === null ? '#14b8a6' : displayHF >= 50 ? '#14b8a6' : displayHF >= 10 ? '#34d399' : displayHF >= 3 ? '#a3e635' : displayHF >= 1 ? '#f59e0b' : '#ef4444'
+                  const displayLabel = displayHF === null ? 'Safe' : displayHF >= 50 ? 'Very Safe' : displayHF >= 10 ? 'Safe' : displayHF >= 3 ? 'Good' : displayHF >= 1 ? 'Monitor' : 'At Risk'
                   const barPct      = hfToBarPct(displayHF)
                   // "before" bar shown as ghost when typing
                   const beforeHF    = healthFactor
-                  const beforeColor = beforeHF === null ? '#14b8a6' : beforeHF >= 2 ? '#14b8a6' : beforeHF >= 1.2 ? '#f59e0b' : '#ef4444'
+                  const beforeColor = beforeHF === null ? '#14b8a6' : beforeHF >= 50 ? '#14b8a6' : beforeHF >= 10 ? '#34d399' : beforeHF >= 3 ? '#a3e635' : beforeHF >= 1 ? '#f59e0b' : '#ef4444'
                   const beforePct   = hfToBarPct(beforeHF)
                   const showBefore  = parseFloat(modalAmount) > 0 && beforeHF !== displayHF
                   return (

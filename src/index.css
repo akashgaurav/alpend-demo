@@ -111,6 +111,37 @@ body::before {
 .legal-body ul, .legal-body ol { margin-bottom: 20px; padding-left: 20px; }
 .legal-body li { margin-bottom: 10px; }
 
+/* Modal amount slider */
+input[type="range"].modal-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #0d2828;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"].modal-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #14b8a6;
+  border: 2px solid #071e1e;
+  box-shadow: 0 0 6px #14b8a655;
+  cursor: pointer;
+}
+input[type="range"].modal-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #14b8a6;
+  border: 2px solid #071e1e;
+  cursor: pointer;
+}
+
 /* Screen transitions */
 .screen-enter {
   animation: screenFadeIn 0.35s ease-out forwards;
