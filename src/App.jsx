@@ -1041,7 +1041,7 @@ function ArcGauge({ value, max = 4 }) {
         style={{ filter: `drop-shadow(0 0 5px ${color})`, transition: 'all 0.7s cubic-bezier(0.33,1,0.68,1)' }}/>
       {/* Value */}
       <text x={cx} y={cy - 6} textAnchor="middle"
-        fill={color} fontSize="20" fontWeight="700" fontFamily="JetBrains Mono, monospace"
+        fill={color} fontSize="20" fontWeight="700" fontFamily="IBM Plex Mono, monospace"
         style={{ transition: 'fill 0.3s' }}>
         {value >= 99 ? '∞' : value.toFixed(2)}
       </text>
@@ -1156,14 +1156,14 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           {/* Net worth */}
           <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
             <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Net Worth</p>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(hasPositions ? fmtUSD(netWorth) : '—')}</p>
+            <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{mask(hasPositions ? fmtUSD(netWorth) : '—')}</p>
           </div>
 
           {/* Supplied */}
           <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ padding: '18px 0' }}>
               <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Supplied</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalSuppliedUSD))}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{mask(fmtUSD(totalSuppliedUSD))}</p>
               <p style={{ fontSize: 8, color: netAPY !== null ? '#14b8a6aa' : '#2a5050', marginTop: 3 }}>{netAPY !== null ? `${fmtPct(netAPY)} APY` : '—'}</p>
             </div>
           </div>
@@ -1172,7 +1172,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ padding: '18px 0' }}>
               <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Borrowed</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: totalBorrowedUSD > 0 ? '#f59e0b' : '#3a6060', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{mask(fmtUSD(totalBorrowedUSD))}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: totalBorrowedUSD > 0 ? '#f59e0b' : '#3a6060', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{mask(fmtUSD(totalBorrowedUSD))}</p>
               <p style={{ fontSize: 8, color: totalBorrowedUSD > 0 ? '#f59e0baa' : '#2a5050', marginTop: 3 }}>{totalBorrowedUSD > 0 ? `${(Object.entries(positions.borrowed).reduce((s, [id, amt]) => { const a = MARKET_ASSETS.find(x => x.id === id); return s + (parseFloat(amt)||0) * a.price * a.borrowRate }, 0) / totalBorrowedUSD).toFixed(2)}% APR` : '—'}</p>
             </div>
           </div>
@@ -1182,7 +1182,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           <div style={{ padding: '18px 0' }}>
             <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Health Factor</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
-              <p style={{ fontSize: 18, fontWeight: 700, color: hfColor, fontFamily: 'JetBrains Mono', lineHeight: 1 }}>
+              <p style={{ fontSize: 18, fontWeight: 700, color: hfColor, fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>
                 {healthFactor !== null ? healthFactor.toFixed(2) : '—'}
               </p>
               {healthFactor !== null && (
@@ -1204,20 +1204,20 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           {/* Public: protocol-level stats */}
           <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
             <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Total Market Size</p>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
+            <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
             <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{MARKET_ASSETS.length} assets</p>
           </div>
           <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ padding: '18px 0' }}>
               <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Total Borrowed</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalBorrowedProtocol)}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtUSD(totalBorrowedProtocol)}</p>
               <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{Math.round(totalBorrowedProtocol / totalTVL * 100)}% of pool</p>
             </div>
           </div>
           <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ padding: '18px 0' }}>
               <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Best Supply APY</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtPct(Math.max(...MARKET_ASSETS.map(a => a.supplyApy)))}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtPct(Math.max(...MARKET_ASSETS.map(a => a.supplyApy)))}</p>
               <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{MARKET_ASSETS.sort((a,b) => b.supplyApy - a.supplyApy)[0].symbol}</p>
             </div>
           </div>
@@ -1226,7 +1226,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           {/* Protocol TVL */}
           <div style={{ padding: '18px 24px 18px 0', borderRight: '1px solid #0d2424', marginRight: 24, flexShrink: 0 }}>
             <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Protocol TVL</p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#8ecece', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#8ecece', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtUSD(totalTVL)}</p>
           </div>
           <div style={{ flex: 1 }} />
 
@@ -1260,7 +1260,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                   <IconShield size={11} color="#14b8a6" />
                   <span style={{ fontSize: 10, fontWeight: 700, color: '#14b8a6', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Your Supplies</span>
                 </div>
-                <span style={{ fontSize: 10, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(totalSuppliedUSD))}{netAPY !== null ? ` · ${fmtPct(netAPY)} APY` : ''}</span>
+                <span style={{ fontSize: 10, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD(totalSuppliedUSD))}{netAPY !== null ? ` · ${fmtPct(netAPY)} APY` : ''}</span>
               </div>
               {/* Column headers */}
               <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 88px', padding: '8px 20px', gap: 8 }}>
@@ -1282,10 +1282,10 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                       </div>
                     </div>
                     <div>
-                      <p style={{ fontSize: 12, color: '#fff', fontFamily: 'JetBrains Mono' }}>{mask(fmtToken(parseFloat(amt)))}</p>
-                      <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD((parseFloat(amt)||0)*a.price))}</p>
+                      <p style={{ fontSize: 12, color: '#fff', fontFamily: 'IBM Plex Mono' }}>{mask(fmtToken(parseFloat(amt)))}</p>
+                      <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD((parseFloat(amt)||0)*a.price))}</p>
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{fmtPct(a.supplyApy)}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(a.supplyApy)}</span>
                     <button onClick={() => openModal('withdraw', a)}
                       style={{ fontSize: 10, padding: '5px 12px', borderRadius: 7, background: '#14b8a610', border: '1px solid #14b8a630', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.12s' }}
                       onMouseEnter={e => e.currentTarget.style.background='#14b8a622'} onMouseLeave={e => e.currentTarget.style.background='#14b8a610'}>
@@ -1328,14 +1328,14 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     </div>
                   </div>
                   <div>
-                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtUSD(asset.totalSupplied * asset.price)}</p>
+                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{fmtUSD(asset.totalSupplied * asset.price)}</p>
                     <p style={{ fontSize: 9, color: '#5a8888', marginTop: 2 }}>{Math.round(util*100)}% utilized</p>
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.supplyApy)}</span>
-                  <span style={{ fontSize: 12, color: '#6aabab', fontFamily: 'JetBrains Mono' }}>{asset.ltv}%</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(asset.supplyApy)}</span>
+                  <span style={{ fontSize: 12, color: '#6aabab', fontFamily: 'IBM Plex Mono' }}>{asset.ltv}%</span>
                   {connected && <div>
-                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{mask(fmtToken(wb, 2))}</p>
-                    <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
+                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{mask(fmtToken(wb, 2))}</p>
+                    <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
                   </div>}
                   <button onClick={() => connected ? openModal('supply', asset) : onConnect?.()}
                     style={{ fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 8, background: connected && hasSupply ? '#14b8a618' : '#14b8a622', border: '1px solid #14b8a640', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
@@ -1360,7 +1360,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                   <IconShield size={11} color="#f59e0b" />
                   <span style={{ fontSize: 10, fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Your Borrows</span>
                 </div>
-                <span style={{ fontSize: 10, color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD(totalBorrowedUSD))} outstanding</span>
+                <span style={{ fontSize: 10, color: '#f59e0b', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD(totalBorrowedUSD))} outstanding</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 88px', padding: '8px 20px', gap: 8 }}>
                 {['Asset', 'Debt', 'Rate', ''].map((h, i) => (
@@ -1381,10 +1381,10 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                       </div>
                     </div>
                     <div>
-                      <p style={{ fontSize: 12, color: '#fff', fontFamily: 'JetBrains Mono' }}>{mask(fmtToken(parseFloat(amt)))}</p>
-                      <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'JetBrains Mono' }}>{mask(fmtUSD((parseFloat(amt)||0)*a.price))}</p>
+                      <p style={{ fontSize: 12, color: '#fff', fontFamily: 'IBM Plex Mono' }}>{mask(fmtToken(parseFloat(amt)))}</p>
+                      <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD((parseFloat(amt)||0)*a.price))}</p>
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>{fmtPct(a.borrowRate)}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b', fontFamily: 'IBM Plex Mono' }}>{fmtPct(a.borrowRate)}</span>
                     <button onClick={() => openModal('repay', a)}
                       style={{ fontSize: 10, padding: '5px 12px', borderRadius: 7, background: '#f59e0b10', border: '1px solid #f59e0b30', color: '#f59e0b', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.12s' }}
                       onMouseEnter={e => e.currentTarget.style.background='#f59e0b22'} onMouseLeave={e => e.currentTarget.style.background='#f59e0b10'}>
@@ -1429,14 +1429,14 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     </div>
                   </div>
                   <div>
-                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtToken(avail, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
+                    <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{fmtToken(avail, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
                     <p style={{ fontSize: 9, color: '#5a8888', marginTop: 3 }}>{fmtUSD(avail * asset.price)}</p>
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>{fmtPct(asset.borrowRate)}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b', fontFamily: 'IBM Plex Mono' }}>{fmtPct(asset.borrowRate)}</span>
                   {connected && <div>
                     {yourLimitUSD > 0
                       ? <>
-                          <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'JetBrains Mono' }}>{fmtToken(yourLimitTokens, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
+                          <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{fmtToken(yourLimitTokens, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
                           <p style={{ fontSize: 9, color: '#5a8888', marginTop: 2 }}>{fmtUSD(yourLimitUSD)}</p>
                         </>
                       : <p style={{ fontSize: 10, color: '#3a6060' }}>Supply first</p>
@@ -1462,12 +1462,12 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           { label: 'Settlement via', name: 'Chainlink Oracle', sub: 'Tamper-proof price feeds', icon: '/chainlink-logo.svg', iconStyle: { height: 16, opacity: 0.85 } },
         ].map((item, i) => (
           <div key={i} style={{ padding: '18px 28px 18px 0', marginRight: 28, borderRight: i < 1 ? '1px solid #0a2020' : 'none', paddingRight: 28 }}>
-            <p style={{ fontSize: 8, color: '#3a6060', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6, fontFamily: 'JetBrains Mono' }}>{item.label}</p>
+            <p style={{ fontSize: 8, color: '#3a6060', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6, fontFamily: 'IBM Plex Mono' }}>{item.label}</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <img src={item.icon} alt={item.name} style={item.iconStyle} />
               <p style={{ fontSize: 15, fontWeight: 600, color: '#c8e8e8', letterSpacing: '-0.01em' }}>{item.name}</p>
             </div>
-            <p style={{ fontSize: 10, color: '#4a7878', fontFamily: 'JetBrains Mono' }}>{item.sub}</p>
+            <p style={{ fontSize: 10, color: '#4a7878', fontFamily: 'IBM Plex Mono' }}>{item.sub}</p>
           </div>
         ))}
       </div>
@@ -1518,11 +1518,11 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                 <div style={{ display: 'flex', justifyContent: 'space-between', background: '#071818', border: '1px solid #0d2424', borderRadius: 10, padding: '12px 15px', marginBottom: 14 }}>
                   <div>
                     <p style={{ fontSize: 8, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{modal.type === 'supply' || modal.type === 'withdraw' ? 'Supply APY' : 'Borrow Rate'}</p>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: accent, fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{modal.type === 'supply' || modal.type === 'withdraw' ? fmtPct(modal.asset.supplyApy) : fmtPct(modal.asset.borrowRate)}</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: accent, fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{modal.type === 'supply' || modal.type === 'withdraw' ? fmtPct(modal.asset.supplyApy) : fmtPct(modal.asset.borrowRate)}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontSize: 8, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>Available</p>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtToken(getAvailable(modal.type, modal.asset), 4)}</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: '#fff', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtToken(getAvailable(modal.type, modal.asset), 4)}</p>
                     <p style={{ fontSize: 8, color: '#5a8888', marginTop: 2 }}>{modal.asset.symbol}</p>
                   </div>
                 </div>
@@ -1530,7 +1530,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                 {/* Input */}
                 <div style={{ position: 'relative', marginBottom: 8 }}>
                   <input type="number" placeholder="0.00" value={modalAmount} onChange={e => setModalAmount(e.target.value)} autoFocus
-                    style={{ width: '100%', background: '#071a1a', border: '1px solid #163030', borderRadius: 12, padding: '15px 80px 15px 15px', fontSize: 22, color: '#fff', outline: 'none', fontFamily: 'JetBrains Mono, monospace', boxSizing: 'border-box' }}
+                    style={{ width: '100%', background: '#071a1a', border: '1px solid #163030', borderRadius: 12, padding: '15px 80px 15px 15px', fontSize: 22, color: '#fff', outline: 'none', fontFamily: 'IBM Plex Mono, monospace', boxSizing: 'border-box' }}
                     onFocus={e => e.target.style.borderColor='#1e5050'} onBlur={e => e.target.style.borderColor='#163030'} />
                   <div style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <div style={{ width: 16, height: 16, borderRadius: 4, background: modal.asset.color+'20', border: `1px solid ${modal.asset.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -1539,7 +1539,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     <span style={{ fontSize: 11, color: '#5a8e8e', fontWeight: 600 }}>{modal.asset.symbol}</span>
                   </div>
                 </div>
-                <p style={{ fontSize: 10, color: '#5a8888', fontFamily: 'JetBrains Mono', marginBottom: 12 }}>≈ {fmtUSD((parseFloat(modalAmount)||0) * modal.asset.price)}</p>
+                <p style={{ fontSize: 10, color: '#5a8888', fontFamily: 'IBM Plex Mono', marginBottom: 12 }}>≈ {fmtUSD((parseFloat(modalAmount)||0) * modal.asset.price)}</p>
 
                 {/* Pct slider */}
                 {(() => {
@@ -1565,7 +1565,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                         <span style={{ fontSize: 9, color: '#4a7878' }}>{leftLabel}</span>
-                        <span style={{ fontSize: 9, fontWeight: 600, color: accent, fontFamily: 'JetBrains Mono' }}>{sliderPct}%</span>
+                        <span style={{ fontSize: 9, fontWeight: 600, color: accent, fontFamily: 'IBM Plex Mono' }}>{sliderPct}%</span>
                         <span style={{ fontSize: 9, color: isBorrow && sliderPct >= 95 ? '#ef4444' : '#4a7878' }}>{rightLabel}</span>
                       </div>
                       <div className="modal-slider-wrap">
@@ -1601,12 +1601,12 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                         <span style={{ fontSize: 10, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Health Factor</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                           {showBefore && (
-                            <span style={{ fontSize: 12, fontFamily: 'JetBrains Mono', color: beforeColor, opacity: 0.45 }}>
+                            <span style={{ fontSize: 12, fontFamily: 'IBM Plex Mono', color: beforeColor, opacity: 0.45 }}>
                               {beforeHF === null ? '∞' : beforeHF.toFixed(2)}
                             </span>
                           )}
                           {showBefore && <span style={{ fontSize: 9, color: '#3a5a5a' }}>→</span>}
-                          <span style={{ fontSize: 17, fontWeight: 700, fontFamily: 'JetBrains Mono', color: displayColor }}>
+                          <span style={{ fontSize: 17, fontWeight: 700, fontFamily: 'IBM Plex Mono', color: displayColor }}>
                             {displayHF === null ? '∞' : displayHF.toFixed(2)}
                           </span>
                           <span style={{ fontSize: 9, fontWeight: 600, color: displayColor, background: displayColor+'18', border: `1px solid ${displayColor}35`, borderRadius: 5, padding: '2px 7px' }}>{displayLabel}</span>
@@ -1643,8 +1643,8 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
               <div style={{ padding: '0 26px 26px' }}>
                 <div style={{ background: '#071818', border: '1px solid #0d2424', borderRadius: 12, padding: '15px 17px', marginBottom: 14 }}>
                   <p style={{ fontSize: 10, color: '#3a6060', marginBottom: 5, textTransform: 'capitalize' }}>{modal.type}ing</p>
-                  <p style={{ fontSize: 24, fontWeight: 700, color: '#fff', fontFamily: 'JetBrains Mono', lineHeight: 1 }}>{fmtToken(parseFloat(modalAmount), 6)} {modal.asset.symbol}</p>
-                  <p style={{ fontSize: 11, color: '#5a8888', marginTop: 4, fontFamily: 'JetBrains Mono' }}>≈ {fmtUSD(parseFloat(modalAmount) * modal.asset.price)}</p>
+                  <p style={{ fontSize: 24, fontWeight: 700, color: '#fff', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtToken(parseFloat(modalAmount), 6)} {modal.asset.symbol}</p>
+                  <p style={{ fontSize: 11, color: '#5a8888', marginTop: 4, fontFamily: 'IBM Plex Mono' }}>≈ {fmtUSD(parseFloat(modalAmount) * modal.asset.price)}</p>
                 </div>
 
                 <div style={{ border: '1px solid #0d2424', borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
@@ -1658,7 +1658,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                   ].map((row, i) => (
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 15px', borderTop: i > 0 ? '1px solid #071818' : 'none', background: i%2===0 ? 'transparent' : '#071818' }}>
                       <span style={{ fontSize: 10, color: '#3a6060' }}>{row.label}</span>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: row.color, fontFamily: 'JetBrains Mono' }}>{row.value}</span>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: row.color, fontFamily: 'IBM Plex Mono' }}>{row.value}</span>
                     </div>
                   ))}
                 </div>
