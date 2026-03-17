@@ -1557,6 +1557,8 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
               const beforePct    = hfToBarPct(beforeHF)
               const showBefore   = curAmt > 0 && beforeHF !== displayHF
 
+              const noCollateral = modal.type === 'borrow' && avail === 0
+
               return (
                 <div style={{ padding: '0 26px 26px' }}>
                   {/* Stats row */}
@@ -1572,6 +1574,37 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     </div>
                   </div>
 
+                  {/* No-collateral gate — shown when user has nothing supplied */}
+                  {noCollateral ? (
+                    <>
+                      <div style={{ background: '#f59e0b0d', border: '1px solid #f59e0b30', borderRadius: 12, padding: '18px 18px', marginBottom: 14 }}>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                          <div style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 9, background: '#f59e0b18', border: '1px solid #f59e0b35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+                            ⚠
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24', marginBottom: 5, lineHeight: 1.3 }}>
+                              Supply collateral first
+                            </p>
+                            <p style={{ fontSize: 11, color: '#a07830', lineHeight: 1.6 }}>
+                              You have no supplied assets. To borrow {modal.asset.symbol}, you need to supply an asset as collateral first — your borrow limit is based on its value.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#071818', border: '1px solid #0d2424', borderRadius: 10, padding: '13px 15px', marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: 10, color: '#3a6060' }}>Your borrow limit</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#2a5050', fontFamily: 'IBM Plex Mono' }}>$0.00</span>
+                      </div>
+
+                      <button onClick={closeModal}
+                        style={{ width: '100%', padding: '14px', borderRadius: 12, fontSize: 13, fontWeight: 700, background: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)', border: 'none', color: '#071e1e', cursor: 'pointer', letterSpacing: '-0.01em' }}>
+                        Go Supply an Asset →
+                      </button>
+                    </>
+                  ) : (
+                    <>
                   {/* Slider — above input */}
                   <div style={{ marginBottom: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -1618,8 +1651,8 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     </div>
                   )}
 
-                  {/* HF preview */}
-                  <div style={{ background: '#071818', border: `1px solid ${displayColor}28`, borderRadius: 10, padding: '14px 16px', marginBottom: 18 }}>
+                  {/* HF preview — only relevant when user has active borrows */}
+                  {(isBorrowSide || totalBorrowedUSD > 0) && <div style={{ background: '#071818', border: `1px solid ${displayColor}28`, borderRadius: 10, padding: '14px 16px', marginBottom: 18 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <span style={{ fontSize: 10, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Health Factor</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -1636,14 +1669,49 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 7 }}>
                       <span style={{ fontSize: 8, color: '#ef444470' }}>← Liquidation at 1.0</span>
-                      <span style={{ fontSize: 8, color: '#14b8a650' }}>Safe ≥ 2.0 →</span>
+                      <span style={{ fontSize: 8, color: '#14b8a650' }}>Safe ≥ 3.0 →</span>
                     </div>
-                  </div>
+                  </div>}
+
+                  {/* Supply projections — borrow power + yield */}
+                  {modal.type === 'supply' && (() => {
+                    const supplyUSD    = curAmt * modal.asset.price
+                    const borrowPower  = supplyUSD * (modal.asset.ltv / 100)
+                    const yieldAnnual  = curAmt * (modal.asset.supplyApy / 100)
+                    const yieldMonthly = yieldAnnual / 12
+                    const hasAmt       = curAmt > 0
+                    return (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+                        {/* Borrow power */}
+                        <div style={{ background: '#071818', border: `1px solid ${hasAmt ? '#f59e0b28' : '#0d2424'}`, borderRadius: 10, padding: '12px 14px', transition: 'border-color 0.3s' }}>
+                          <p style={{ fontSize: 8, color: '#5a7070', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>Borrow Power</p>
+                          <p style={{ fontSize: 15, fontWeight: 700, fontFamily: 'IBM Plex Mono', color: hasAmt ? '#f59e0b' : '#2a4040', lineHeight: 1, transition: 'color 0.3s' }}>
+                            {hasAmt ? fmtUSD(borrowPower) : '$—'}
+                          </p>
+                          <p style={{ fontSize: 8, color: hasAmt ? '#7a5520' : '#1a3030', marginTop: 4, transition: 'color 0.3s' }}>
+                            {hasAmt ? `${modal.asset.ltv}% LTV on ${fmtUSD(supplyUSD)}` : `${modal.asset.ltv}% LTV applied`}
+                          </p>
+                        </div>
+                        {/* Yield */}
+                        <div style={{ background: '#071818', border: `1px solid ${hasAmt ? '#14b8a628' : '#0d2424'}`, borderRadius: 10, padding: '12px 14px', transition: 'border-color 0.3s' }}>
+                          <p style={{ fontSize: 8, color: '#5a7070', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>Est. Yield</p>
+                          <p style={{ fontSize: 15, fontWeight: 700, fontFamily: 'IBM Plex Mono', color: hasAmt ? '#14b8a6' : '#2a4040', lineHeight: 1, transition: 'color 0.3s' }}>
+                            {hasAmt ? `${fmtToken(yieldAnnual, 4)} ${modal.asset.symbol}` : '—'}
+                          </p>
+                          <p style={{ fontSize: 8, color: hasAmt ? '#2a6a5a' : '#1a3030', marginTop: 4, transition: 'color 0.3s' }}>
+                            {hasAmt ? `per year · ${fmtToken(yieldMonthly, 4)} ${modal.asset.symbol}/mo` : `${modal.asset.supplyApy}% APY`}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })()}
 
                   <button onClick={() => canReview && setModalStep(2)}
                     style={{ width: '100%', padding: '14px', borderRadius: 12, fontSize: 13, fontWeight: 700, background: btnBg, border: btnBorder, color: btnColor, cursor: canReview ? 'pointer' : 'default', transition: 'all 0.2s', letterSpacing: '-0.01em' }}>
                     {btnLabel}
                   </button>
+                    </>
+                  )}
                 </div>
               )
             })()}
@@ -1965,6 +2033,57 @@ function PrivacyScreen() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SCREEN: Checking Status (shown briefly after re-login when already submitted)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function CheckingScreen({ onDone }) {
+  useEffect(() => {
+    document.title = 'Alpend — Checking Your Status'
+    const t = setTimeout(onDone, 1400)
+    return () => clearTimeout(t)
+  }, [onDone])
+
+  return (
+    <div className="dot-bg min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 flex items-center justify-center px-4 relative" style={{ zIndex: 2 }}>
+        <div
+          className="w-full max-w-sm rounded-2xl p-6 sm:p-8 text-center"
+          style={{
+            background: 'linear-gradient(160deg, #0e2e2e, #0a2424)',
+            border: '1px solid #163838',
+            boxShadow: '0 0 60px #14b8a610, 0 20px 60px #00000060',
+          }}
+        >
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: '#0d2828', border: '1px solid #1e4040', boxShadow: '0 0 20px #14b8a615', color: '#14b8a6' }}
+          >
+            <IconSpinner size={22} />
+          </div>
+
+          <p className="text-sm font-semibold text-white mb-1.5">Checking your status</p>
+          <p className="text-xs mb-8" style={{ color: '#7ababa' }}>
+            Verifying your application on the waitlist…
+          </p>
+
+          <div className="flex items-center justify-center gap-2">
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                width: 5, height: 5, borderRadius: '50%',
+                background: '#14b8a6',
+                animation: `a-bounce 1.3s ease-in-out ${i * 0.18}s infinite`,
+              }} />
+            ))}
+          </div>
+        </div>
+      </main>
+      <div style={{ position: 'relative', zIndex: 2 }}><Footer /></div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function AppRoutes() {
   const nav = useNavigate()
@@ -2015,6 +2134,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/"          element={<LandingScreen onJoin={handleJoin} />} />
         <Route path="/connect"   element={<ConnectingScreen />} />
+        <Route path="/loader"    element={<CheckingScreen onDone={() => nav('/loader')} />} />
         <Route path="/waitlist" element={
           <WhitelistScreen
             partyId={partyId} email={email} steps={steps}
