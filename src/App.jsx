@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import ReactDOM from 'react-dom'
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, useParams } from 'react-router-dom'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -932,10 +933,57 @@ function SubmittedScreen({ email, partyId, onLogout, onEnterMarkets }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MARKET_ASSETS = [
-  { id: 'cbtc',  name: 'BitSafe BTC',       symbol: 'CBTC',  icon: '/cbtc.webp',   color: '#f7931a', supplyApy: 1.24, borrowRate: 3.82, price: 95420,  ltv: 70, liquidationThreshold: 75, liquidationPenalty: 7.5,  reserveFactor: 10, borrowCap: 200,      oracle: 'Chainlink BTC/USD',  totalSupplied: 145.8,   totalBorrowed: 99.1,    walletKey: 'cbtc'  },
-  { id: 'usdcx', name: 'Circle Stablecoin', symbol: 'USDCx', icon: '/usdc.svg',    color: '#2775ca', supplyApy: 4.85, borrowRate: 6.20, price: 1.00,   ltv: 80, liquidationThreshold: 85, liquidationPenalty: 4.5,  reserveFactor: 10, borrowCap: 15000000, oracle: 'Chainlink USDC/USD', totalSupplied: 8500000, totalBorrowed: 6120000, walletKey: 'usdcx' },
-  { id: 'cc',    name: 'Canton Coin',       symbol: 'CC',    icon: '/cccoin.svg',  color: '#14b8a6', supplyApy: 2.10, borrowRate: 5.50, price: 0.85,   ltv: 60, liquidationThreshold: 65, liquidationPenalty: 10.0, reserveFactor: 20, borrowCap: 3000000,  oracle: 'Chainlink CC/USD',   totalSupplied: 1200000, totalBorrowed: 660000,  walletKey: 'cc'    },
+  { id: 'cbtc',  name: 'BitSafe BTC',       symbol: 'CBTC',  icon: '/cbtc.webp',   color: '#f7931a', supplyApy: 1.24, incentiveApy: 0,  borrowRate: 3.82, price: 95420,  ltv: 70, liquidationThreshold: 75, liquidationPenalty: 7.5,  reserveFactor: 10, borrowCap: 200,      oracle: 'Chainlink BTC/USD',  totalSupplied: 145.8,   totalBorrowed: 99.1,    walletKey: 'cbtc'  },
+  { id: 'usdcx', name: 'Circle Stablecoin', symbol: 'USDCx', icon: '/usdc.svg',    color: '#2775ca', supplyApy: 4.85, incentiveApy: 15, borrowRate: 6.20, price: 1.00,   ltv: 80, liquidationThreshold: 85, liquidationPenalty: 4.5,  reserveFactor: 10, borrowCap: 15000000, oracle: 'Chainlink USDC/USD', totalSupplied: 8500000, totalBorrowed: 6120000, walletKey: 'usdcx' },
+  { id: 'cc',    name: 'Canton Coin',       symbol: 'CC',    icon: '/cccoin.svg',  color: '#14b8a6', supplyApy: 2.10, incentiveApy: 8,  borrowRate: 5.50, price: 0.85,   ltv: 60, liquidationThreshold: 65, liquidationPenalty: 10.0, reserveFactor: 20, borrowCap: 3000000,  oracle: 'Chainlink CC/USD',   totalSupplied: 1200000, totalBorrowed: 660000,  walletKey: 'cc'    },
 ]
+
+const totalSupplyApy = a => a.supplyApy + (a.incentiveApy || 0)
+
+// ── Incentivized APY display ────────────────────────────────────────────────
+function IncentiveAPY({ asset, size = 'md' }) {
+  const [pos, setPos] = useState(null)
+  const ref = useRef(null)
+  const total = totalSupplyApy(asset)
+  const hasIncentive = asset.incentiveApy > 0
+  const fontSize = size === 'lg' ? 26 : size === 'sm' ? 12 : 14
+
+  const showTip = () => {
+    if (!ref.current) return
+    const r = ref.current.getBoundingClientRect()
+    setPos({ top: r.bottom + 6, left: r.left })
+  }
+
+  return (
+    <div ref={ref} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}
+      onMouseEnter={showTip} onMouseLeave={() => setPos(null)}>
+      <span style={{ fontSize, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>
+        {fmtPct(total)}
+      </span>
+      {hasIncentive && (
+        <span style={{ fontSize: size === 'lg' ? 13 : 10, color: '#f59e0b', lineHeight: 1, cursor: 'default' }}>✦</span>
+      )}
+      {hasIncentive && pos && ReactDOM.createPortal(
+        <div style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: '#0d2828', border: '1px solid #1e4040', borderRadius: 10, padding: '10px 13px', minWidth: 170, boxShadow: '0 8px 24px #00000070', pointerEvents: 'none' }}>
+          <p style={{ fontSize: 8, color: '#4a8080', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>APY Breakdown</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+            <span style={{ fontSize: 10, color: '#7aaaba' }}>Base APY</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{fmtPct(asset.supplyApy)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 10, color: '#f59e0b' }}>✦ Reward APY</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#f59e0b', fontFamily: 'IBM Plex Mono' }}>+{fmtPct(asset.incentiveApy)}</span>
+          </div>
+          <div style={{ borderTop: '1px solid #1a3838', paddingTop: 7, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#d0eaea' }}>Total APY</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(total)}</span>
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  )
+}
 
 // ── Health factor colour + label — single source of truth ──────────────────
 function hfColor(hf) {
@@ -1237,8 +1285,11 @@ function ActionModal({ modal, onClose, positions, setPositions, balance }) {
           <div style={{ padding: '0 26px 26px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', background: '#071818', border: '1px solid #0d2424', borderRadius: 10, padding: '12px 15px', marginBottom: 14 }}>
               <div>
-                <p style={{ fontSize: 8, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{modal.type === 'supply' || modal.type === 'withdraw' ? 'Supply APY' : 'Borrow Rate'}</p>
-                <p style={{ fontSize: 16, fontWeight: 700, color: accent, fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{modal.type === 'supply' || modal.type === 'withdraw' ? fmtPct(modal.asset.supplyApy) : fmtPct(modal.asset.borrowRate)}</p>
+                <p style={{ fontSize: 8, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 }}>{modal.type === 'supply' || modal.type === 'withdraw' ? 'Supply APY' : 'Borrow Rate'}</p>
+                {modal.type === 'supply' || modal.type === 'withdraw'
+                  ? <IncentiveAPY asset={modal.asset} size="sm" />
+                  : <p style={{ fontSize: 16, fontWeight: 700, color: accent, fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtPct(modal.asset.borrowRate)}</p>
+                }
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ fontSize: 8, color: '#5a8888', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>
@@ -1339,7 +1390,7 @@ function ActionModal({ modal, onClose, positions, setPositions, balance }) {
                 {modal.type === 'supply' && (() => {
                   const supplyUSD = curAmt * modal.asset.price
                   const borrowPower = supplyUSD * (modal.asset.ltv / 100)
-                  const yieldAnnual = curAmt * (modal.asset.supplyApy / 100)
+                  const yieldAnnual = curAmt * (totalSupplyApy(modal.asset) / 100)
                   const yieldMonthly = yieldAnnual / 12
                   const hasAmt = curAmt > 0
                   return (
@@ -1352,7 +1403,7 @@ function ActionModal({ modal, onClose, positions, setPositions, balance }) {
                       <div style={{ background: '#071818', border: `1px solid ${hasAmt ? '#14b8a628' : '#0d2424'}`, borderRadius: 10, padding: '12px 14px' }}>
                         <p style={{ fontSize: 8, color: '#5a7070', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>Est. Yield</p>
                         <p style={{ fontSize: 15, fontWeight: 700, fontFamily: 'IBM Plex Mono', color: hasAmt ? '#14b8a6' : '#2a4040', lineHeight: 1 }}>{hasAmt ? `${fmtToken(yieldAnnual, 4)} ${modal.asset.symbol}` : '—'}</p>
-                        <p style={{ fontSize: 8, color: hasAmt ? '#2a6a5a' : '#1a3030', marginTop: 4 }}>{hasAmt ? `per year · ${fmtToken(yieldMonthly, 4)} ${modal.asset.symbol}/mo` : `${modal.asset.supplyApy}% APY`}</p>
+                        <p style={{ fontSize: 8, color: hasAmt ? '#2a6a5a' : '#1a3030', marginTop: 4 }}>{hasAmt ? `per year · ${fmtToken(yieldMonthly, 4)} ${modal.asset.symbol}/mo` : `${totalSupplyApy(modal.asset)}% APY`}</p>
                       </div>
                     </div>
                   )
@@ -1375,7 +1426,7 @@ function ActionModal({ modal, onClose, positions, setPositions, balance }) {
             </div>
             <div style={{ border: '1px solid #0d2424', borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
               {[
-                { label: modal.type === 'supply' || modal.type === 'withdraw' ? 'Supply APY' : 'Borrow Rate', value: modal.type === 'supply' || modal.type === 'withdraw' ? fmtPct(modal.asset.supplyApy) : fmtPct(modal.asset.borrowRate), color: accent },
+                { label: modal.type === 'supply' || modal.type === 'withdraw' ? 'Supply APY' : 'Borrow Rate', value: modal.type === 'supply' || modal.type === 'withdraw' ? fmtPct(totalSupplyApy(modal.asset)) : fmtPct(modal.asset.borrowRate), color: accent },
                 { label: 'Max LTV',        value: `${modal.asset.ltv}%`,  color: '#8ecece' },
                 { label: 'Network',        value: 'Canton Network',        color: '#8ecece' },
                 { label: 'Settlement',     value: 'T+0',                   color: '#8ecece' },
@@ -1709,6 +1760,16 @@ function AssetDetailScreen({ positions, setPositions, balance, partyId, onLogout
         <div style={{ height: '100%', width: `${util * 100}%`, background: `linear-gradient(90deg, #14b8a6, ${utilColor})`, transition: 'width 0.5s' }} />
       </div>
 
+      {/* ── Private beta notice ── */}
+      <div className="px-4 sm:px-8 md:px-14" style={{ paddingTop: 14, paddingBottom: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0a1e1e', border: '1px solid #1a3535', borderRadius: 8, padding: '7px 14px' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', flexShrink: 0, boxShadow: '0 0 6px #f59e0b88' }} />
+          <p style={{ fontSize: 10, color: '#5a8888', lineHeight: 1.5 }}>
+            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Private Beta</span> — You're accessing Alpend before public launch. Some features are still being refined. Use at your own discretion.
+          </p>
+        </div>
+      </div>
+
       {/* Main layout: left 3fr = reserve config, right 2fr = your info */}
       <main className="px-4 sm:px-8 md:px-14 pt-6 pb-10" style={{ flex: 1, display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 22, alignItems: 'start' }}>
 
@@ -1729,8 +1790,8 @@ function AssetDetailScreen({ positions, setPositions, balance, partyId, onLogout
                   <p style={{ fontSize: 10, color: '#557070', fontFamily: 'IBM Plex Mono', marginTop: 3 }}>{fmtUSD(tvlUSD)}</p>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ ...lbl, textTransform: 'uppercase' }}>Supply APR</p>
-                  <p style={{ fontSize: 26, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtPct(asset.supplyApy)}</p>
+                  <p style={{ ...lbl, textTransform: 'uppercase', marginBottom: 6 }}>Supply APY</p>
+                  <IncentiveAPY asset={asset} size="lg" />
                 </div>
               </div>
 
@@ -1866,7 +1927,7 @@ function AssetDetailScreen({ positions, setPositions, balance, partyId, onLogout
                   <IconShield size={11} color="#14b8a6" />
                   <span style={{ fontSize: 10, fontWeight: 700, color: '#14b8a6', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Supply</span>
                 </div>
-                <span style={{ fontSize: 9, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(asset.supplyApy)} APY</span>
+                <span style={{ fontSize: 9, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(totalSupplyApy(asset))} APY</span>
               </div>
               <div style={{ padding: '16px 20px' }}>
                 <p style={{ fontSize: 20, fontWeight: 700, color: '#e8f4f4', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtToken(userSupplied, 4)} <span style={{ fontSize: 12, color: '#6b9090' }}>{asset.symbol}</span></p>
@@ -1874,8 +1935,8 @@ function AssetDetailScreen({ positions, setPositions, balance, partyId, onLogout
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
                   <div style={inset}>
                     <p style={lbl}>Est. annual yield</p>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>+{fmtToken(userSupplied * asset.supplyApy / 100, 4)}</p>
-                    <p style={{ fontSize: 8, color: '#557070', marginTop: 2 }}>{asset.symbol}/yr · {fmtUSD(userSupplied * asset.supplyApy / 100 * asset.price)}</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>+{fmtToken(userSupplied * totalSupplyApy(asset) / 100, 4)}</p>
+                    <p style={{ fontSize: 8, color: '#557070', marginTop: 2 }}>{asset.symbol}/yr · {fmtUSD(userSupplied * totalSupplyApy(asset) / 100 * asset.price)}</p>
                   </div>
                   <div style={inset}>
                     <p style={lbl}>Borrow power</p>
@@ -1983,9 +2044,20 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
   const netAPY   = totalSuppliedUSD > 0
     ? Object.entries(positions.supplied).reduce((s, [id, amt]) => {
         const a = MARKET_ASSETS.find(x => x.id === id)
-        return s + (parseFloat(amt) || 0) * a.price * a.supplyApy }, 0) / totalSuppliedUSD
+        return s + (parseFloat(amt) || 0) * a.price * totalSupplyApy(a) }, 0) / totalSuppliedUSD
     : null
   const hasPositions = totalSuppliedUSD > 0 || totalBorrowedUSD > 0
+
+  // CC rewards: incentive APY on supplied assets accrues as CC tokens (45-day mock accrual).
+  const CC_PRICE = 0.85
+  const MOCK_DAYS = 45
+  const CC_MOCK_BASE = { usdcx: 892.40, cc: 392.10 } // mock historical accrual per asset
+  const totalCCEarned = Object.entries(CC_MOCK_BASE).reduce((s, [id, base]) => s + base, 0)
+    + Object.entries(positions.supplied).reduce((s, [id, amt]) => {
+      const a = MARKET_ASSETS.find(x => x.id === id)
+      if (!a || !a.incentiveApy) return s
+      return s + ((parseFloat(amt) || 0) * a.price * (a.incentiveApy / 100) * (MOCK_DAYS / 365)) / CC_PRICE
+    }, 0)
 
   const openModal  = (type, asset) => setModal({ type, asset })
   const closeModal = () => setModal(null)
@@ -2066,8 +2138,8 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
           <div style={{ borderRight: '1px solid #0d2424', paddingRight: 24, marginRight: 24, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ padding: '18px 0' }}>
               <p style={{ fontSize: 8, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Best Supply APY</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtPct(Math.max(...MARKET_ASSETS.map(a => a.supplyApy)))}</p>
-              <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{MARKET_ASSETS.sort((a,b) => b.supplyApy - a.supplyApy)[0].symbol}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>{fmtPct(Math.max(...MARKET_ASSETS.map(a => totalSupplyApy(a))))}</p>
+              <p style={{ fontSize: 8, color: '#4a7878', marginTop: 3 }}>{[...MARKET_ASSETS].sort((a,b) => totalSupplyApy(b) - totalSupplyApy(a))[0].symbol}</p>
             </div>
           </div>
           </>)}
@@ -2095,8 +2167,91 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
         </div>
       </div>
 
+      {/* ── Private beta notice ─────────────────────────────────────────── */}
+      <div className="px-4 sm:px-8 md:px-14" style={{ paddingTop: 14, paddingBottom: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0a1e1e', border: '1px solid #1a3535', borderRadius: 8, padding: '7px 14px' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', flexShrink: 0, boxShadow: '0 0 6px #f59e0b88' }} />
+          <p style={{ fontSize: 10, color: '#5a8888', lineHeight: 1.5 }}>
+            <span style={{ color: '#f59e0b', fontWeight: 600 }}>Private Beta</span> — You're accessing Alpend before public launch. Some features are still being refined. Use at your own discretion.
+          </p>
+        </div>
+      </div>
+
       {/* ── Aave-style two-column layout ────────────────────────────────── */}
       <main className="px-4 sm:px-8 md:px-14 pt-6 pb-8" style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
+
+        {/* ════ CC REWARDS BANNER ════ */}
+        {connected && (
+          <div style={{ gridColumn: '1 / -1', background: 'linear-gradient(135deg, #091e1e 0%, #0d2828 60%, #091c20 100%)', border: '1px solid #14b8a635', borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+
+            {/* CC icon + label */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 13, background: '#14b8a614', border: '1px solid #14b8a640', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 18px #14b8a620' }}>
+                <img src="/cccoin.svg" alt="CC" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+              </div>
+              <div>
+                <p style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 3 }}>Earned Rewards</p>
+                <p style={{ fontSize: 12, fontWeight: 700, color: '#14b8a6', letterSpacing: '0.02em' }}>Canton Coin (CC)</p>
+              </div>
+            </div>
+
+            {/* Vertical divider */}
+            <div style={{ width: 1, height: 46, background: '#14b8a622', flexShrink: 0 }} />
+
+            {/* Big earned amount */}
+            <div style={{ flexShrink: 0 }}>
+              <p style={{ fontSize: 30, fontWeight: 700, color: '#fff', fontFamily: 'IBM Plex Mono', lineHeight: 1 }}>
+                {mask(fmtToken(totalCCEarned, 2))}{' '}
+                <span style={{ fontSize: 16, color: '#14b8a6', fontWeight: 600 }}>CC</span>
+              </p>
+              <p style={{ fontSize: 11, color: '#5a8888', fontFamily: 'IBM Plex Mono', marginTop: 5 }}>
+                ≈ {mask(fmtUSD(totalCCEarned * CC_PRICE))}
+              </p>
+            </div>
+
+            {/* Per-asset breakdown chips — one per incentivised asset */}
+            <div style={{ flex: 1, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              {MARKET_ASSETS.filter(a => a.incentiveApy > 0).map(a => {
+                const suppliedAmt = parseFloat(positions.supplied[a.id]) || 0
+                const ccFromAsset = ((suppliedAmt * a.price * (a.incentiveApy / 100) * (MOCK_DAYS / 365)) / CC_PRICE)
+                const ccTotal = (CC_MOCK_BASE[a.id] || 0) + ccFromAsset
+                return (
+                  <div key={a.id} style={{ background: ccTotal > 0 ? '#0a1a1a' : '#091818', border: `1px solid ${ccTotal > 0 ? '#1a3636' : '#14b8a622'}`, borderRadius: 10, padding: '9px 14px', flexShrink: 0, cursor: ccTotal === 0 ? 'pointer' : 'default', transition: 'border-color 0.15s' }}
+                    onClick={ccTotal === 0 ? () => nav(`/markets/${a.id}`) : undefined}
+                    onMouseEnter={ccTotal === 0 ? e => e.currentTarget.style.borderColor='#14b8a650' : undefined}
+                    onMouseLeave={ccTotal === 0 ? e => e.currentTarget.style.borderColor='#14b8a622' : undefined}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <img src={a.icon} alt={a.symbol} style={{ width: 14, height: 14, objectFit: 'contain', opacity: ccTotal > 0 ? 0.85 : 0.5 }} />
+                      <span style={{ fontSize: 9, color: '#4a7878', textTransform: 'uppercase', letterSpacing: '0.08em' }}>From {a.symbol} supply</span>
+                    </div>
+                    {ccTotal > 0 ? (<>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>
+                        +{fmtToken(ccTotal, 2)}{' '}
+                        <span style={{ fontSize: 10, fontWeight: 500 }}>CC</span>
+                      </p>
+                      <p style={{ fontSize: 8, color: '#3a6060', marginTop: 2 }}>+{fmtPct(a.incentiveApy)} bonus APY</p>
+                    </>) : (<>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: '#14b8a6', marginBottom: 2 }}>Start earning CC →</p>
+                      <p style={{ fontSize: 8, color: '#3a6060' }}>Supply {a.symbol} for +{fmtPct(a.incentiveApy)} bonus</p>
+                    </>)}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Claim badge + note */}
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#14b8a60c', border: '1px solid #14b8a635', borderRadius: 20, padding: '7px 16px' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#14b8a6', boxShadow: '0 0 7px #14b8a6aa', flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#14b8a6', letterSpacing: '0.02em' }}>Claim opens soon</span>
+              </div>
+              <p style={{ fontSize: 9, color: '#3a5e5e', textAlign: 'right', maxWidth: 180, lineHeight: 1.5 }}>
+                Incentive APY accrues hourly as CC.<br />Claim window will be announced.
+              </p>
+            </div>
+
+          </div>
+        )}
 
         {/* ════ SUPPLY COLUMN ════ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -2137,7 +2292,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                       <p style={{ fontSize: 12, color: '#fff', fontFamily: 'IBM Plex Mono' }}>{mask(fmtToken(parseFloat(amt)))}</p>
                       <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD((parseFloat(amt)||0)*a.price))}</p>
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(a.supplyApy)}</span>
+                    <IncentiveAPY asset={a} size="sm" />
                     <button onClick={() => openModal('withdraw', a)}
                       style={{ fontSize: 10, padding: '5px 12px', borderRadius: 7, background: '#14b8a610', border: '1px solid #14b8a630', color: '#14b8a6', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'background 0.12s' }}
                       onMouseEnter={e => e.currentTarget.style.background='#14b8a622'} onMouseLeave={e => e.currentTarget.style.background='#14b8a610'}>
@@ -2184,7 +2339,7 @@ function MarketsScreen({ partyId, balance, onLogout, connected = true, onConnect
                     <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{fmtToken(asset.totalSupplied, 2)} <span style={{ fontSize: 9, color: '#5a8888' }}>{asset.symbol}</span></p>
                     <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'IBM Plex Mono', marginTop: 2 }}>{fmtUSD(asset.totalSupplied * asset.price)}</p>
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#14b8a6', fontFamily: 'IBM Plex Mono' }}>{fmtPct(asset.supplyApy)}</span>
+                  <IncentiveAPY asset={asset} />
                   {connected && <div>
                     <p style={{ fontSize: 12, color: '#8ecece', fontFamily: 'IBM Plex Mono' }}>{mask(fmtToken(wb, 2))}</p>
                     <p style={{ fontSize: 9, color: '#5a8888', fontFamily: 'IBM Plex Mono' }}>{mask(fmtUSD(wb * asset.price))}</p>
